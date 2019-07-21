@@ -1,7 +1,90 @@
 <script>
-    console.log("hello world")
-    google.script.run.fetchListData();
+var list_cases_table_body = document.getElementsByClassName("list_cases_table_body")[0];
+var list_cases_table_head = document.getElementsByClassName("list_cases_table_head")[0];
+
+/*
+* addZero adds the missing zero to int in date less than 10
+* Example 9 -> 09
+* @time_variable {Integer}
+* returns {String }
+*/
+function addZero(time_variable){
+    if(time_variable < 10){
+        time_variable = '0' + time_variable;
+    }
+    return time_variable
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.datepicker');
+    var options = {
+        format: 'dd/mm/yyyy',
+        showClearBtn:true
+    };
+    var instances = M.Datepicker.init(elems,options);
+});
+
+/***************CREATE_TABLE_HEADER*******************/
+function createHeaders(table_data, table_head){
+    for(x in Object.keys(table_data[0])){
+        var table_th = document.createElement("th");
+        table_th.innerText = Object.keys(table_data[0])[x];
+        table_head.append(table_th);
+    }
+}
+
+/***************CREATE_TABLE*******************/
+function createTable(table_data, table_body){
+    for(var i = 0; i< table_data.length; i++){
+        var table_tr = document.createElement("tr");
+        for(x in table_data[i]){
+            var table_td = document.createElement("td");
+            table_td.innerHTML = table_data[i][x];
+            table_td.setAttribute("style", "padding-left:15px;width:20px;")
+            table_tr.append(table_td)
+        }
+        table_body.append(table_tr);
+    }
+}
+
+google.script.run.fetchDataFromTrix();
 
 
+var searchbox1 = document.getElementsByClassName("validate")[0];
+console.log("searchbox1", searchbox1);
+searchbox1.addEventListener("keyup", myFunction)
 
+function myFunction() {
+    var input, filter, ul, li, a, i;
+    input = searchbox1
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("list_cases_table_body");
+    li = ul.getElementsByTagName('tr');
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("td");
+		var match_found = false;
+		for(var j = 0 ; j< a.length; j++){
+			if (a[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+				li[i].style.display = "";
+				match_found = true;
+			}
+		}
+		if(match_found == false){
+			li[i].style.display = "none";
+		}
+    }
+}
+
+
+function onSuccessTable(table_data){
+    createHeaders(table_data,list_cases_table_head );
+    createTable(table_data, list_cases_table_body);
+}
+
+function fetchData2(){
+    google.script.run.withSuccessHandler(onSuccessTable).fetchDataFromTrix();
+}
+
+google.script.run.withSuccessHandler(onSuccessTable).fetchDataFromTrix();
 </script>
